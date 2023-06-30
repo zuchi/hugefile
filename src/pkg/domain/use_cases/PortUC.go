@@ -10,15 +10,15 @@ import (
 )
 
 type PortUC struct {
-	parser ports.PortParser
+	parser      ports.PortParser
+	portService *ports.Service
 }
 
-func NewPortUC(parser ports.PortParser) *PortUC {
-	return &PortUC{parser: parser}
-}
-
-func save(port domain.Port) {
-
+func NewPortUC(parser ports.PortParser, service *ports.Service) *PortUC {
+	return &PortUC{
+		parser:      parser,
+		portService: service,
+	}
 }
 
 func (puc *PortUC) ParseAndPersist(ctx context.Context, reader io.Reader) error {
@@ -40,8 +40,10 @@ func (puc *PortUC) ParseAndPersist(ctx context.Context, reader io.Reader) error 
 				return nil
 			}
 
-			i++
-			save(port)
+			err := puc.portService.SavePort(ctx, port)
+			if err != nil {
+				return err
+			}
 		case err := <-errChannel:
 			return err
 		}

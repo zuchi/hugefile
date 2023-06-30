@@ -11,11 +11,11 @@ import (
 
 type PortUC struct {
 	parser      ports.PortParser
-	portService *ports.Service
+	portService ports.PortService
 	log         *zap.SugaredLogger
 }
 
-func NewPortUC(parser ports.PortParser, service *ports.Service) *PortUC {
+func NewPortUC(parser ports.PortParser, service ports.PortService) *PortUC {
 
 	logger, _ := zap.NewProduction()
 	log := logger.Sugar().With("component", "port uc")
@@ -39,6 +39,7 @@ func (puc *PortUC) ParseAndPersist(ctx context.Context, reader io.Reader) error 
 	var i int64
 
 	go puc.parser.ParserReader(reader, portChannel, errChannel)
+
 	for {
 		select {
 		case port := <-portChannel:

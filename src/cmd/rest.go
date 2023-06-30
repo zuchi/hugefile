@@ -22,7 +22,8 @@ func main() {
 	quit := make(chan os.Signal)
 	signal.Notify(quit, syscall.SIGTERM, os.Interrupt, os.Kill)
 
-	go server.Run(":3000")
+	add := os.Getenv("SERVER_ADDRESS")
+	go server.Run(add)
 
 	<-quit
 

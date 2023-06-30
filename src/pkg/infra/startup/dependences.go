@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
+	"os"
 	"time"
 )
 
@@ -22,7 +23,9 @@ func InitDependencies(ctx context.Context) Dependencies {
 	ctxTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	mongoClient, err := mongo.Connect(ctxTimeout, options.Client().ApplyURI("mongodb://localhost:27017/port_db"))
+	mongoURI := os.Getenv("DATABASE_URI")
+
+	mongoClient, err := mongo.Connect(ctxTimeout, options.Client().ApplyURI(mongoURI))
 	if err != nil {
 		panic(fmt.Errorf("cannot connect to the database: %w", err))
 	}
@@ -32,7 +35,8 @@ func InitDependencies(ctx context.Context) Dependencies {
 		panic(fmt.Errorf("cannot ping into mongodb database: %w", err))
 	}
 
-	portCollection := mongoClient.Database("port_db").Collection("port")
+	databaseName := os.Getenv("DATABASE_NAME")
+	portCollection := mongoClient.Database(databaseName).Collection("port")
 	portRepositoryImpl := mongodb.NewPortRepositoryImpl(portCollection)
 
 	portService := ports.NewServicePort(portRepositoryImpl)

@@ -49,3 +49,7 @@ func (puc *PortUC) ParseAndPersist(ctx context.Context, reader io.Reader) error 
 		}
 	}
 }
+
+func (puc *PortUC) GetPortByKey(ctx context.Context, id string) (domain.Port, error) {
+	return puc.portService.GetPortByKey(ctx, id)
+}

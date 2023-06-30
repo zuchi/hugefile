@@ -4,6 +4,7 @@ import (
 	"90poe/src/pkg/domain"
 	"context"
 	"errors"
+	"strings"
 )
 
 type Service struct {
@@ -19,12 +20,17 @@ func (sp *Service) SavePort(ctx context.Context, port domain.Port) error {
 		return errors.New("there is no port to be saved")
 	}
 
-	sp.portRepository.Save(ctx, port)
+	err := sp.portRepository.Save(ctx, port)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
 
 func (sp *Service) GetPortByKey(ctx context.Context, key string) (domain.Port, error) {
-
-	return domain.Port{}, nil
+	if strings.TrimSpace(key) == "" {
+		return domain.Port{}, nil
+	}
+	return sp.portRepository.FindByKey(ctx, key)
 }

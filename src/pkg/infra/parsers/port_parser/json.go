@@ -17,6 +17,12 @@ func NewJsonParser() *Json {
 }
 
 func (j *Json) ParserReader(reader io.Reader, nextPort chan domain.Port, errChannel chan error) error {
+	defer func() {
+		if r := recover(); r != nil {
+			fmt.Printf("channels has been closed")
+		}
+	}()
+
 	var i int64
 	dec := json.NewDecoder(reader)
 	token, err := dec.Token()

@@ -21,7 +21,7 @@ func InitDependencies(ctx context.Context) Dependencies {
 	ctxTimeout, cancel := context.WithTimeout(ctx, 30*time.Second)
 	defer cancel()
 
-	mongoClient, err := mongo.Connect(ctxTimeout, options.Client().ApplyURI("mongodb://localhost:27017"))
+	mongoClient, err := mongo.Connect(ctxTimeout, options.Client().ApplyURI("mongodb://localhost:27017/port_db"))
 	if err != nil {
 		panic(fmt.Errorf("cannot connect to the database: %w", err))
 	}
@@ -31,9 +31,7 @@ func InitDependencies(ctx context.Context) Dependencies {
 		panic(fmt.Errorf("cannot ping into mongodb database: %w", err))
 	}
 
-	mongoClient.Database()
-
-	portCollection := mongoClient.Database("portDb").Collection("port")
+	portCollection := mongoClient.Database("port_db").Collection("port")
 	portRepositoryImpl := mongodb.NewPortRepositoryImpl(portCollection)
 
 	portService := ports.NewServicePort(portRepositoryImpl)

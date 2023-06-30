@@ -20,7 +20,7 @@ func (p PortRepositoryImpl) Save(ctx context.Context, port domain.Port) error {
 	mongoPort := fromDomain(port)
 
 	opts := options.Update().SetUpsert(true)
-	_, err := p.col.UpdateOne(ctx, bson.M{"_id": port.Key}, mongoPort, opts)
+	_, err := p.col.UpdateOne(ctx, bson.M{"_id": port.Key}, bson.M{"$set": mongoPort}, opts)
 	if err != nil {
 		return err
 	}

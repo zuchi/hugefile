@@ -19,6 +19,8 @@ func (s *Server) StartServer(address string) {
 
 	// upload file
 	mux.HandleFunc("/upload", s.UploadFilePOST())
+	// get by key
+	mux.HandleFunc("/port", s.GetPortGET())
 
 	fmt.Printf("server is running at 3000\n")
 	http.ListenAndServe(address, mux)

@@ -13,8 +13,9 @@ import (
 )
 
 type Dependencies struct {
-	PortParser ports.PortParser
-	PortUC     *use_cases.PortUC
+	PortParser  ports.PortParser
+	PortUC      *use_cases.PortUC
+	MongoClient *mongo.Client
 }
 
 func InitDependencies(ctx context.Context) Dependencies {
@@ -39,5 +40,6 @@ func InitDependencies(ctx context.Context) Dependencies {
 	dep := Dependencies{}
 	dep.PortParser = port_parser.NewJsonParser()
 	dep.PortUC = use_cases.NewPortUC(dep.PortParser, portService)
+	dep.MongoClient = mongoClient
 	return dep
 }

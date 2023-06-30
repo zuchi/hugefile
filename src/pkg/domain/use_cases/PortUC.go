@@ -4,7 +4,7 @@ import (
 	"90poe/src/pkg/domain"
 	"90poe/src/pkg/domain/ports"
 	"context"
-	"fmt"
+	"go.uber.org/zap"
 	"io"
 	"strings"
 )
@@ -12,12 +12,18 @@ import (
 type PortUC struct {
 	parser      ports.PortParser
 	portService *ports.Service
+	log         *zap.SugaredLogger
 }
 
 func NewPortUC(parser ports.PortParser, service *ports.Service) *PortUC {
+
+	logger, _ := zap.NewProduction()
+	log := logger.Sugar().With("component", "port uc")
+
 	return &PortUC{
 		parser:      parser,
 		portService: service,
+		log:         log,
 	}
 }
 
@@ -30,14 +36,21 @@ func (puc *PortUC) ParseAndPersist(ctx context.Context, reader io.Reader) error 
 		close(errChannel)
 	}()
 
-	go puc.parser.ParserReader(reader, portChannel, errChannel)
 	var i int64
+
+	go puc.parser.ParserReader(reader, portChannel, errChannel)
 	for {
 		select {
 		case port := <-portChannel:
+			// if we receive an empty key, it means that we don't have more things to process
 			if strings.TrimSpace(port.Key) == "" {
-				fmt.Printf("\nPortSaved: %d\n", i)
+				puc.log.Infof("total processed: %d", i)
 				return nil
+			}
+
+			i++
+			if i%250 == 0 {
+				puc.log.Infof("already processed: %d", i)
 			}
 
 			err := puc.portService.SavePort(ctx, port)

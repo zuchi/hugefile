@@ -2,28 +2,50 @@ package rest
 
 import (
 	"90poe/src/pkg/domain/use_cases"
-	"fmt"
+	"context"
+	"go.uber.org/zap"
 	"net/http"
 )
 
 type Server struct {
 	PortUC *use_cases.PortUC
+	log    *zap.SugaredLogger
+	mux    *http.Server
 }
 
 func NewServer(portUC *use_cases.PortUC) *Server {
-	return &Server{PortUC: portUC}
+	srv := new(Server)
+	logger, _ := zap.NewProduction()
+	logSuggar := logger.Sugar().With("component", "server")
+	srv.log = logSuggar
+
+	mux := http.NewServeMux()
+	// upload file
+	mux.HandleFunc("/upload", srv.UploadFilePOST())
+	// get by key
+	mux.HandleFunc("/port", srv.GetPortGET())
+
+	server := &http.Server{
+		Handler: mux,
+	}
+
+	srv.mux = server
+	srv.PortUC = portUC
+
+	return srv
 }
 
-func (s *Server) StartServer(address string) {
-	mux := http.NewServeMux()
+func (s *Server) Run(address string) {
+	s.log.Infof("Starting server at %s", address)
+	http.ListenAndServe(address, s.mux.Handler)
+}
 
-	// upload file
-	mux.HandleFunc("/upload", s.UploadFilePOST())
-	// get by key
-	mux.HandleFunc("/port", s.GetPortGET())
-
-	fmt.Printf("server is running at 3000\n")
-	http.ListenAndServe(address, mux)
+func (s *Server) Shutdown(ctx context.Context) error {
+	err := s.mux.Shutdown(ctx)
+	if err != nil {
+		return err
+	}
+	return nil
 }
 
 func writeMessage(response http.ResponseWriter, message string, statusCode int) {

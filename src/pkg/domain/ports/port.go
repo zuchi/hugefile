@@ -7,7 +7,7 @@ import (
 )
 
 type PortParser interface {
-	ParserReader(reader io.Reader, nextPort chan domain.Port, errChannel chan error) error
+	ParserReader(reader io.Reader, nextPort chan domain.Port, errChannel chan error)
 }
 
 type PortRepository interface {

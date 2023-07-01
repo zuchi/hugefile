@@ -1,6 +1,14 @@
 # Huge file project
 
 This project is to test memory limit when uploading a huge json file in Golang
+<p>To build this project I used Golang 1.20.5 and mongodb 4.2.8. You can use Golang 1.20+ and mongodb 4.2.8+ if you want.</p>
+
+Also the structure that I have used in this project are:
+* `cmd`: this is the initialization place of the project. Currently, we have rest.go that is responsible for initialize the API rest
+* `pkg/domain`: in this place is where our business rules live. Here we should avoid having third-party library, mainly if this library is part of the infrastructure (like database, frameworks, etc)
+* `pkg/infra`: In this place is where we keep all infrastructure such as database implementation, web-framework implementation, parsers implementation and so on.
+* `pkg/infra/startup`: This is the place we create the dependencies of the system and also is the place we inject the structs in other structures in order to compound the system levels. 
+
 
 ### How you can run this project
 <p>To run this project you must have the docker environment (docker and docker-compose) installed in our machine. Once you get this installed, what you have to do is to clone this repository locally

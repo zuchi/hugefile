@@ -1,0 +1,48 @@
+version: "3.8"
+
+services:
+  mongo:
+    container_name: mongo-database
+    image: mongo:5.0.18
+    restart: unless-stopped
+
+    ports:
+      - "27017:27017"
+    networks:
+      - net-1
+
+
+  rest-api:
+    container_name: rest
+    environment:
+      - DATABASE_URI=mongodb://mongo-database:27017
+      - DATABASE_NAME=port_db
+      - SERVER_ADDRESS=:3000
+
+    build:
+      context: .
+      dockerfile: Dockerfile
+
+    deploy:
+      resources:
+        limits:
+          memory: 200m
+        reservations:
+          memory: 128m
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      - mongo
+
+    networks:
+      - net-1
+
+networks:
+  net-1:
+    name: net-1
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.50.23.0/24
